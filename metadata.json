@@ -1,0 +1,6 @@
+{
+  "name": "Smart Waste Disposal & Tracking System",
+  "description": "A comprehensive smart waste disposal application featuring real-time bin level notifications, an interactive AI waste analyzer, automated quotation, integrated payment processing, and a real-time truck tracking dashboard.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
