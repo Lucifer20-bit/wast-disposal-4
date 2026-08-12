@@ -93,6 +93,50 @@ export default function CustomerPortal({
     lng: -122.3302
   };
 
+  const binPurchaseOptions = [
+    {
+      type: 'General' as const,
+      size: 32,
+      name: 'General Bin',
+      price: 32000,
+      badge: 'Most Popular',
+      description: 'Perfect for mixed household waste and daily city pickups.',
+      features: ['GPS tracking', 'Smart fill sensor', 'Weekly collection']
+    },
+    {
+      type: 'Recycling' as const,
+      size: 64,
+      name: 'Recycling Bin',
+      price: 48000,
+      badge: 'Smart Eco',
+      description: 'Designed for plastics, paper, and reusable materials.',
+      features: ['Separate sorting', 'Eco alerts', 'Priority pickup']
+    },
+    {
+      type: 'Organic' as const,
+      size: 64,
+      name: 'Organic Bin',
+      price: 52000,
+      badge: 'Garden Ready',
+      description: 'Built for compost, kitchen scraps, and green waste.',
+      features: ['Odor control', 'Monthly service', 'Fast collection']
+    },
+    {
+      type: 'Electronic' as const,
+      size: 96,
+      name: 'E-Waste Bin',
+      price: 76000,
+      badge: 'Safe Handling',
+      description: 'For electronics, cables, and safely disposed tech waste.',
+      features: ['Certified handling', 'Secure pickup', 'Verification report']
+    }
+  ];
+
+  const handlePurchaseBin = (type: 'General' | 'Recycling' | 'Organic' | 'Hazardous' | 'Electronic', size: number, price: number) => {
+    onAddBin(type, size, activeCustomer.name, activeCustomer.address, activeCustomer.lat, activeCustomer.lng);
+    setShowAddBin(false);
+  };
+
   // Live Driver status (en_route) to calculate dynamic tracking distance/ETA
   const [activeDriver, setActiveDriver] = useState<Driver | null>(null);
   const [distanceRemaining, setDistanceRemaining] = useState<number | null>(null);
@@ -379,6 +423,58 @@ export default function CustomerPortal({
               <span>Configure New IoT Bin</span>
             </button>
           </div>
+        </div>
+      </div>
+
+      <div className="bg-white border border-slate-200 rounded-xl p-5 md:p-6 shadow-sm">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-5">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-600">Bin Marketplace</span>
+            <h2 className="mt-1 text-xl font-black text-slate-800">Buy a Smart Waste Bin</h2>
+          </div>
+          <button
+            onClick={() => setShowAddBin(true)}
+            className="px-3 py-2 text-xs font-bold border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-all"
+          >
+            Custom Bin Order
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          {binPurchaseOptions.map((option) => (
+            <div key={option.type} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 shadow-sm hover:shadow-md transition-all">
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">
+                  {option.badge}
+                </span>
+                <span className="text-[10px] font-semibold text-slate-500">{option.size} gal</span>
+              </div>
+
+              <h3 className="text-lg font-black text-slate-800">{option.name}</h3>
+              <p className="mt-2 text-sm text-slate-500 leading-relaxed">{option.description}</p>
+
+              <div className="mt-4 flex items-end gap-1">
+                <span className="text-2xl font-black text-slate-900">₦{option.price.toLocaleString()}</span>
+                <span className="text-[10px] text-slate-400 mb-1">one-time</span>
+              </div>
+
+              <ul className="mt-4 space-y-2 text-xs text-slate-600">
+                {option.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                onClick={() => handlePurchaseBin(option.type, option.size, option.price)}
+                className="mt-5 w-full py-2.5 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-700 transition-all"
+              >
+                Buy this bin
+              </button>
+            </div>
+          ))}
         </div>
       </div>
 
