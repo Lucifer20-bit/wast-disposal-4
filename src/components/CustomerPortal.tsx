@@ -82,6 +82,23 @@ export default function CustomerPortal({
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [checkoutSuccess, setCheckoutSuccess] = useState(false);
 
+  // Shopping Cart State
+  interface CartItem {
+    type: 'General' | 'Recycling' | 'Organic' | 'Hazardous' | 'Electronic';
+    name: string;
+    size: number;
+    price: number;
+    quantity: number;
+  }
+
+  const [shoppingCart, setShoppingCart] = useState<CartItem[]>([]);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [checkoutStep, setCheckoutStep] = useState<'cart' | 'delivery' | 'payment' | 'confirmation'>('cart');
+  const [selectedDelivery, setSelectedDelivery] = useState<'standard' | 'express' | 'scheduled'>('standard');
+  const [deliveryDate, setDeliveryDate] = useState('');
+  const [checkoutPaymentMethod, setCheckoutPaymentMethod] = useState<'card' | 'bank'>('card');
+  const [cartOrderSuccess, setCartOrderSuccess] = useState(false);
+
   // Active Customer profile object
   const activeCustomer = customers.find(c => c.id === activeCustomerId) || customers[0] || {
     id: 'cust-1',
@@ -132,10 +149,45 @@ export default function CustomerPortal({
     }
   ];
 
-  const handlePurchaseBin = (type: 'General' | 'Recycling' | 'Organic' | 'Hazardous' | 'Electronic', size: number, price: number) => {
-    onAddBin(type, size, activeCustomer.name, activeCustomer.address, activeCustomer.lat, activeCustomer.lng);
-    setShowAddBin(false);
+  const handlePurchaseBin = (option: any) => {
+    // Add to cart instead of directly purchasing
+    const existingItem = shoppingCart.find(item => item.type === option.type);
+    if (existingItem) {
+      setShoppingCart(shoppingCart.map(item =>
+        item.type === option.type
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      ));
+    } else {
+      setShoppingCart([...shoppingCart, {
+        type: option.type,
+        name: option.name,
+        size: option.size,
+        price: option.price,
+        quantity: 1
+      }]);
+    }
+    // Show checkout modal
+    setShowCheckout(true);
   };
+
+  const handleRemoveFromCart = (type: string) => {
+    setShoppingCart(shoppingCart.filter(item => item.type !== type));
+  };
+
+  const handleUpdateCartQuantity = (type: string, quantity: number) => {
+    if (quantity <= 0) {
+      handleRemoveFromCart(type);
+    } else {
+      setShoppingCart(shoppingCart.map(item =>
+        item.type === type ? { ...item, quantity } : item
+      ));
+    }
+  };
+
+  const cartTotal = shoppingCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const deliveryFee = selectedDelivery === 'express' ? 5000 : selectedDelivery === 'scheduled' ? 2000 : 0;
+  const orderTotal = cartTotal + deliveryFee;
 
   // Live Driver status (en_route) to calculate dynamic tracking distance/ETA
   const [activeDriver, setActiveDriver] = useState<Driver | null>(null);
@@ -468,7 +520,7 @@ export default function CustomerPortal({
               </ul>
 
               <button
-                onClick={() => handlePurchaseBin(option.type, option.size, option.price)}
+                onClick={() => handlePurchaseBin(option)}
                 className="mt-5 w-full py-2.5 rounded-lg bg-slate-900 text-white text-xs font-bold hover:bg-slate-700 transition-all"
               >
                 Buy this bin
